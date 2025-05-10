@@ -69,13 +69,16 @@ def predict(args, model, tokenizer, data_loader, dataset_split, device, split_na
             predictions.append(line)
             pred_labels.append(pred)
 
-    # Save to file with split name in filename
-    pred_filename = f"{split_name}_predictions_{args.num_train_epochs}_{args.lr}_{args.batch_size}.txt"
-    with open(pred_filename, "w", encoding="utf-8") as f:
-        f.write("\n".join(predictions))
-    print(f"Predictions saved to {pred_filename}")
+    # Save to file
+    if split_name == "test":
+        with open("predictions.txt", "w", encoding="utf-8") as f:
+            f.write("\n".join(predictions))
+    else:
+        pred_filename = f"{split_name}_predictions_{args.num_train_epochs}_{args.lr}_{args.batch_size}.txt"
+        with open(pred_filename, "w", encoding="utf-8") as f:
+            f.write("\n".join(predictions))
+    print(f"Predictions saved for {split_name} split.")
     return pred_labels
-
 
 
 def compute_test_accuracy(pred_labels, true_labels):
@@ -145,13 +148,7 @@ def main():
       # Predict on test set
       test_pred_labels = predict(args, model, tokenizer, test_loader, dataset['test'], device, split_name="test")
       true_test_labels = np.array(dataset['test']['label'])
-      compute_test_accuracy(test_pred_labels, true_test_labels)
-
-      # Predict on validation set
-      val_loader = torch.utils.data.DataLoader(val_data, batch_size=1, collate_fn=data_collator)
-      val_pred_labels = predict(args, model, tokenizer, val_loader, dataset['validation'], device, split_name="val")
-      true_val_labels = np.array(dataset['validation']['label'])
-      compute_test_accuracy(val_pred_labels, true_val_labels)
+      compute_test_accuracy(test_pred_labels, true_test_labels) 
 
 
 # Automatically run with default config inside Colab
